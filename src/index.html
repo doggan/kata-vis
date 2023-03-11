@@ -1,0 +1,279 @@
+<html>
+
+<head>
+  <title>Karate Kata - Foot Position Visualizer</title>
+  <script src="https://unpkg.com/roughjs@latest/bundled/rough.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/js/all.min.js" integrity="sha512-2bMhOkE/ACz21dJT8zBOMgMecNxx0d37NND803ExktKiKdSzdwn+L7i9fdccw/3V06gM/DBWKbYmQvKMdAA9Nw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css" integrity="sha512-EZLkOqwILORob+p0BXZc+Vm3RgJBOe1Iq/0fiI7r/wJgzOFZMlsqTa29UEl6v6U6gsV4uIpsNZoV32YZqrCRCQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha512-SzlrxWUlpfuzQ+pcUCosxcglQRNAq/DZjVsC0lE40xsADsfeQoEypE+enwcOiGjk/bSuGGKHEyjSoQ1zVisanQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+
+    <style>
+        .step-button {
+            padding: 0 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+        }
+    </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="row">
+        <h2>Karata Kata - Foot Position Visualizer</h2>
+    </div>
+    <div class="row">
+        <div class="nine columns">
+            <canvas id="canvas" width="800" height="800"></canvas>
+        </div>
+        <div class="three columns">
+            <div>
+            <fieldset>
+                <b>Current Kata</b>
+                <select id="kata" onchange="kataChanged()">
+                <option value="taikyoku1">Taikyoku Sono Ichi / Ni (1 / 2)</option>
+                <!-- <option value="taikyoku3">Taikyoku Sono San (3)</option> -->
+                <option value="sanchin">Sanchin</option>
+                </select>
+            </fieldset>
+        </div>
+
+            <div>
+            <button class="button-primary step-button" onclick="stepBeginning()"><i class="fa-solid fa-backward-fast"></i></button>
+            <button class="button-primary step-button" onclick="stepBack()"><i class="fa-solid fa-backward-step"></i></i></button>
+            <button class="button-primary step-button" onclick="stepForward()"><i class="fa-solid fa-forward-step"></i></button>
+            <button class="button-primary step-button" onclick="stepEnd()"><i class="fa-solid fa-forward-fast"></i></button>
+            </div>
+
+            <br>
+
+            <div><b>Comments</b><div id="comment-contents">-</div></div>
+
+            <br>
+
+            <div><b>Key</b><br>
+                Left Foot: <span style="color:rgba(239, 118, 122, 1.0); font-size: 150%;">&#9632;</span><br>
+                Right Foot: <span style="color:rgba(69, 105, 144, 1.0); font-size: 150%;">&#9632;</span><br>
+            </div>
+        </div>
+    </div>
+  </div>
+
+
+  <script>
+    const N = [0, -1];
+    const NE = [.707, -.707];
+    const E = [1, 0];
+    const SE = [.707, .707];
+    const S = [0, 1];
+    const SW = [-.707, .707];
+    const W = [-1, 0];
+    const NW = [-.707, -.707];
+
+    const rc = rough.canvas(document.getElementById('canvas'));
+
+    var canvas = document.getElementById("canvas")
+    var ctx = canvas.getContext("2d")
+
+    const gridWidth = 800;
+    const gridHeight = 800;
+
+    const TAIKYOKU_1_STEPS = [
+        { "lx": 0, "ly": 0, "la": -45, "ra": 45, "comment": "Musubi dachi" },
+        { "lx": -.5, "rx": .5, "la": 0, "ra": 0, "comment": "Yoi"},
+        { "lx": -1, "ly": -1, "la": -90, "ra": -90, "comment": "Count 1" },
+        { "rx": -4, "ry": 0, "la": -90, "ra": -90, "comment": "Count 2" },
+        { "rx": 4, "ry": -2, "la": 90, "ra": 90, "comment": "Count 3"},
+        { "lx": 4, "ry": 0, "la": 90, "ra": 90, "comment": "Count 4"},
+        { "lx": -3, "ly": 1, "la": 0, "ra": 0, "comment": "Count 5"},
+        { "rx": 0, "ry": 4, "la": 0, "ra": 0, "comment": "Count 6"},
+        { "rx": 0, "ly": 4, "la": 0, "ra": 0, "comment": "Count 7"},
+        { "rx": 0, "ry": 4, "la": 0, "ra": 0, "comment": "Count 8 (kiai❗)"},
+        { "lx": 3, "ly": 3, "la": 90, "ra": 90, "comment": "Count 9"},
+        { "rx": 4, "la": 90, "ra": 90, "comment": "Count 10"},
+        { "rx": -4, "ry": 2, "la": -90, "ra": -90, "comment": "Count 11"},
+        { "lx": -4, "la": -90, "ra": -90, "comment": "Count 12"},
+        { "lx": 3, "ly": -1, "la": 180, "ra": 180, "comment": "Count 13"},
+        { "ry": -4, "la": 180, "ra": 180, "comment": "Count 14"},
+        { "ly": -4, "la": 180, "ra": 180, "comment": "Count 15"},
+        { "ry": -4, "la": 180, "ra": 180, "comment": "Count 16 (kiai❗)"},
+        { "lx": -3, "ly": -3, "la": -90, "ra": -90, "comment": "Count 17"},
+        { "rx": -4, "la": -90, "ra": -90, "comment": "Count 18"},
+        { "rx": 4, "ry": -2, "la": 90, "ra": 90, "comment": "Count 19"},
+        { "lx": 4, "la": 90, "ra": 90, "comment": "Count 20 (kiai❗)"},
+
+        { "lx": -3, "ly": -1, "la": 0, "ra": 0, "comment": "Naore"},
+        { "rx": -1, "la": 0, "ra": 0, "comment": "Bow"},
+    ]
+
+    const SANCHIN_STEPS = [
+        { "lx": 0, "ly": 0, "la": -45, "ra": 45, "comment": "Musubi dachi" },
+        { "lx": -.5, "rx": .5, "la": 0, "ra": 0, "comment": "Yoi"},
+        { "rx": 0, "ry": .5, "la": 0, "ra": -45, },
+        { "lx": 0, "ly": 1, "la": 45, "ra": 0, },
+        { "rx": 0, "ry": 1, "la": 0, "ra": -45, },
+
+        { "rx": -2, "ry": 0, "la": -135, "ra": 180, },
+        { "rx": 0, "ry": -1, "ra": 135, "la": 180, },
+        { "lx": 0, "ly": -1, "la": -135, "ra": 180, },
+        { "rx": 0, "ry": -1, "ra": 135, "la": 180, },
+
+        { "rx": 2, "ry": 0, "ra": 0, "la": 45, },
+        { "rx": 0, "ry": 1, "ra": -45, "la": 0, },
+        { "lx": 0, "ly": 1, "ra": 0, "la": 45, },
+        { "rx": 0, "ry": 1, "ra": -45, "la": 0, },
+
+        { "rx": 0, "ry": 0, "ra": -45, "la": 0, "comment": "Punch (x2)"},
+        { "rx": 0, "ry": 0, "ra": -45, "la": 0, "comment": "Palms (x3)"},
+
+        { "rx": 0, "ry": -1, "ra": 0, "la": 45},
+        { "lx": 0, "ly": -1, "ra": -45, "la": 0},
+
+        { "rx": -1, "ry": -.5, "ra": 45, "la": -45, "comment": "Musubi dachi"},
+    ]
+
+    let currentKataSteps = TAIKYOKU_1_STEPS;
+    // let currentKataSteps = SANCHIN_STEPS;
+    let currentStep = 0;
+
+    function draw() {
+        let absoluteSteps = [];
+        let tmpLX = 0
+        let tmpLY = 0;
+        let tmpRX = 0
+        let tmpRY = 0;
+
+        for (let i = 0; i < currentKataSteps.length; i++) {
+            let stepLX = currentKataSteps[i]["lx"] ?? 0;
+            let stepLY = currentKataSteps[i]["ly"] ?? 0;
+            let stepRX = currentKataSteps[i]["rx"] ?? 0;
+            let stepRY = currentKataSteps[i]["ry"] ?? 0;
+            tmpLX += stepLX;
+            tmpLY += stepLY;
+            tmpRX += stepRX;
+            tmpRY += stepRY;
+            absoluteSteps.push({
+                "lx": tmpLX, "ly": tmpLY, "rx": tmpRX, "ry": tmpRY,
+                "la": currentKataSteps[i].la ?? 0, "ra": currentKataSteps[i].ra ?? 0,
+                "comment": currentKataSteps[i].comment,
+            })
+        }
+
+
+
+        
+        ctx.clearRect(0, 0, gridWidth, gridHeight)
+
+        // draw grid
+        const cellSize = 50;
+        const circleSize = 18;
+
+        for (let i = 0; i < 20; i++) {
+            let yOffset = cellSize/2
+            rc.line(i * cellSize + yOffset, 0, i * cellSize + yOffset, gridWidth, {stroke: 'rgba(254, 125, 125, 0.8)', bowing: 0});
+            rc.line(0, i * cellSize + yOffset, gridWidth, i * cellSize + yOffset, {stroke: 'rgba(254, 125, 125, 0.8)', bowing: 0});
+        }
+
+        for (let i = 0; i < 20; i++) {
+            rc.line(i * cellSize, 0, i * cellSize, gridWidth, {stroke: 'rgba(60, 60, 60, 0.7)', bowing: 0});
+            rc.line(0, i * cellSize, gridWidth, i * cellSize, {stroke: 'rgba(60, 60, 60, 0.7)', bowing: 0});
+        }
+        rc.line(gridWidth/2, 0, gridWidth/2, gridWidth, {stroke: 'rgba(60, 60, 60, 0.7)', strokeWidth: 3, bowing: 0 });
+        rc.line(0, gridWidth/2, gridWidth, gridWidth/2, {stroke: 'rgba(60, 60, 60, 0.7)', strokeWidth: 3, bowing: 0 });
+
+        let step = absoluteSteps[currentStep];
+
+        console.log("step: ", step)
+
+        let lCenterX = step.lx * cellSize + gridWidth/2
+        let lCenterY = step.ly * -cellSize + gridWidth/2
+        let rCenterX = step.rx * cellSize + gridWidth/2
+        let rCenterY = step.ry * -cellSize + gridWidth/2
+
+        if (lCenterX === rCenterX && lCenterY === rCenterY) {
+            lCenterX += -circleSize / 2;
+            rCenterX += circleSize / 2;
+        }
+
+        rc.circle(lCenterX, lCenterY, circleSize, {fill: 'rgba(239, 118, 122, 1.0)', fillStyle: 'solid',});
+        rc.circle(rCenterX, rCenterY, circleSize, {fill: 'rgba(69, 105, 144, 1.0)', fillStyle: 'solid',});
+
+        const dirLen = cellSize / 2;
+        let lDir = N;
+        if (step.la === 45) { lDir = NE; }
+        else if (step.la === 90) { lDir = E; }
+        else if (step.la === 135) { lDir = SE; }
+        else if (step.la === 180) { lDir = S; }
+        else if (step.la === -135) { lDir = SW; }
+        else if (step.la === -90) { lDir = W; }
+        else if (step.la === -45) { lDir = NW; }
+        let rDir = N;
+        if (step.ra === 45) { rDir = NE; }
+        else if (step.ra === 90) { rDir = E; }
+        else if (step.ra === 135) { rDir = SE; }
+        else if (step.ra === 180) { rDir = S; }
+        else if (step.ra === -135) { rDir = SW; }
+        else if (step.ra === -90) { rDir = W; }
+        else if (step.ra === -45) { rDir = NW; }
+
+        rc.line(lCenterX, lCenterY, lCenterX + lDir[0] * dirLen, lCenterY + lDir[1] * dirLen, {strokeWidth: 3})
+        rc.line(rCenterX, rCenterY, rCenterX + rDir[0] * dirLen, rCenterY + rDir[1] * dirLen, {strokeWidth: 3})
+
+
+        let commentContents = step.comment ?? "-";
+        document.getElementById("comment-contents").innerHTML = commentContents;
+    }
+
+    function kataChanged() {
+        const selectedVal = document.getElementById("kata").value;        
+        console.log("## kata changed: ", selectedVal)
+
+        switch (selectedVal) {
+            case 'sanchin': currentKataSteps = SANCHIN_STEPS; break;
+            default: currentKataSteps = TAIKYOKU_1_STEPS; break;
+        }
+
+        currentStep = 0;
+        draw();
+    }
+
+    function stepForward() {
+        currentStep++;
+
+        // TODO: disable buttons if no next step
+        if (currentStep >= currentKataSteps.length) {
+            currentStep = currentKataSteps.length - 1
+        }
+
+        draw();
+    }
+
+    function stepBack() {
+        currentStep--;
+        // TODO: disable buttons if no previous steps
+        if (currentStep < 0) {
+            currentStep = 0;
+        }
+        
+        draw();
+    }
+
+    function stepBeginning() {
+        currentStep = 0;
+        draw();
+    }
+
+    function stepEnd() {
+        currentStep = currentKataSteps.length - 1;
+        draw();
+    }
+
+    draw();
+  </script>
+</body>
+
+</html>
