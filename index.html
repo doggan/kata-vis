@@ -1,7 +1,7 @@
 <html>
 
 <head>
-  <title>Karate Kata - Foot Position Visualizer</title>
+  <title>Karate Kata - Feet Positions</title>
   <script src="https://unpkg.com/roughjs@latest/bundled/rough.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/js/all.min.js" integrity="sha512-2bMhOkE/ACz21dJT8zBOMgMecNxx0d37NND803ExktKiKdSzdwn+L7i9fdccw/3V06gM/DBWKbYmQvKMdAA9Nw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
@@ -18,13 +18,21 @@
         .container {
             max-width: 1200px;
         }
+
+        .footer-hr {
+            margin-bottom: 20px;
+        }
+        .footer {
+            padding-bottom: 30px;
+            text-align: center;
+        }
     </style>
 </head>
 
 <body>
   <div class="container">
     <div class="row">
-        <h2>Karata Kata - Foot Position Visualizer</h2>
+        <h2>Karate Kata - Feet Positions</h2>
     </div>
     <div class="row">
         <div class="nine columns">
@@ -33,11 +41,12 @@
         <div class="three columns">
             <div>
             <fieldset>
-                <b>Current Kata</b>
+                <b>Kata Selection</b>
                 <select id="kata" onchange="kataChanged()">
                 <option value="taikyoku1">Taikyoku Sono Ichi / Ni (1 / 2)</option>
                 <!-- <option value="taikyoku3">Taikyoku Sono San (3)</option> -->
                 <option value="sanchin">Sanchin</option>
+                <option value="gekisai1">Geki Sai Dai Ichi (1)</option>
                 </select>
             </fieldset>
         </div>
@@ -56,9 +65,17 @@
             <br>
 
             <div><b>Key</b><br>
-                Left Foot: <span style="color:rgba(239, 118, 122, 1.0); font-size: 150%;">&#9632;</span><br>
-                Right Foot: <span style="color:rgba(69, 105, 144, 1.0); font-size: 150%;">&#9632;</span><br>
+                <span style="color:rgba(239, 118, 122, 1.0); font-size: 150%;">&#9632;</span> - Left Foot<br>
+                <span style="color:rgba(69, 105, 144, 1.0); font-size: 150%;">&#9632;</span> - Right Foot<br>
             </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="column footer">
+            <hr class="footer-hr">
+            Built by <a href="http://shy.am/" target="_blank" rel="noopener noreferrer">Shyam Guthikonda</a> in 2023<br><br>
+            <a href="https://github.com/doggan/kata-vis" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-github fa-2xl"></i></a>
+          </a>
         </div>
     </div>
   </div>
@@ -136,8 +153,38 @@
         { "rx": -1, "ry": -.5, "ra": 45, "la": -45, "comment": "Musubi dachi"},
     ]
 
+    const GEKISAI_1_STEPS = [
+        { "lx": 0, "ly": 0, "la": -45, "ra": 45, "comment": "Musubi dachi" },
+        { "lx": -.5, "rx": .5, "la": 0, "ra": 0, "comment": "Yoi"},
+
+        { "rx": -0.5, "ry": 1, "la": -45, "ra": -90, "comment": "Jodan uke"},
+        { "rx": -1, "ry": 0, "la": -90, "ra": -135, "comment": "Chudan tsuki"},
+        { "rx": 2.5, "ry": -1, "la": 0, "ra": 0, "comment": ""},
+        { "lx": 1.5, "ly": 1, "la": 90, "ra": 45, "comment": "Jodan uke"},
+        { "lx": 1, "ly": 0, "la": 135, "ra": 90, "comment": "Chudan tsuki"},
+        { "lx": -2.5, "ly": -1, "la": 0, "ra": 0, "comment": ""},
+
+        { "lx": 1, "ly": 0.5, "la": 45, "ra": 0, "comment": "Chudan uchi uke"},
+        { "rx": 0, "ry": 1, "la": 0, "ra": -45, "comment": "Chudan uchi uke"},
+
+        { "lx": 0, "ly": 2.5, "la": 0, "ra": 0, "comment": "Kick sequence"},
+
+        { "rx": -1, "ry": 1, "la": 90, "ra": 90, "comment": ""},
+        { "lx": 1, "ly": -1.5, "la": -135, "ra": 180, "comment": "Chudan uchi uke"},
+        { "rx": 0, "ry": -2.5, "la": 180, "ra": 180, "comment": "Kick sequence"},
+
+        { "lx": -1, "ly": -1, "la": 90, "ra": 90, "comment": ""},
+
+        { "lx": -1, "ly": -3, "la": 0, "ra": 0, "comment": ""},
+        { "lx": 0.5, "ly": 2, "la": 0, "ra": 0, "comment": "???"},
+        { "rx": 0.5, "ry": -2, "la": 0, "ra": 0, "comment": ""},
+
+        { "rx": -1, "ry": 2, "la": 0, "ra": 0, "comment": "Naore - musubi dachi"},
+        
+    ]
+
     let currentKataSteps = TAIKYOKU_1_STEPS;
-    // let currentKataSteps = SANCHIN_STEPS;
+    // let currentKataSteps = GEKISAI_1_STEPS;
     let currentStep = 0;
 
     function draw() {
@@ -170,7 +217,7 @@
 
         // draw grid
         const cellSize = 50;
-        const circleSize = 18;
+        const circleSize = 20;
 
         for (let i = 0; i < 20; i++) {
             let yOffset = cellSize/2
@@ -234,6 +281,7 @@
 
         switch (selectedVal) {
             case 'sanchin': currentKataSteps = SANCHIN_STEPS; break;
+            case 'gekisai1': currentKataSteps = GEKISAI_1_STEPS; break;
             default: currentKataSteps = TAIKYOKU_1_STEPS; break;
         }
 
