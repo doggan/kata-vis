@@ -53,7 +53,10 @@
 
             <div style="padding-bottom: 20px;">
                 <label>
-                    <input id="movement-checkbox" type="checkbox" checked> Show kata path?
+                    <input id="movement-checkbox" type="checkbox"> Show kata path?
+                </label>
+                <label>
+                    <input id="prev-steps-checkbox" type="checkbox"> Show previous steps?
                 </label>
             </div>
             
@@ -88,16 +91,27 @@
 
 
   <script>
-    let showMovementPath = true;
+    let showMovementPath = false;
+    let showPrevSteps = false;
 
     document.addEventListener('DOMContentLoaded', function(event) {
-        const checkbox = document.getElementById('movement-checkbox')
-
-        checkbox.addEventListener('change', (event) => {
+        const movementCheckbox = document.getElementById('movement-checkbox')
+        movementCheckbox.addEventListener('change', (event) => {
             if (event.currentTarget.checked) {
                 showMovementPath = true;
             } else {
                 showMovementPath = false;
+            }
+
+            draw();
+        })
+
+        const prevStepsCheckbox = document.getElementById('prev-steps-checkbox')
+        prevStepsCheckbox.addEventListener('change', (event) => {
+            if (event.currentTarget.checked) {
+                showPrevSteps = true;
+            } else {
+                showPrevSteps = false;
             }
 
             draw();
@@ -206,25 +220,25 @@
 
         { "rx": -0.5, "ry": 1, "la": -45, "ra": -90, "comment": "Jodan uke"},
         { "rx": -1, "ry": 0, "la": -90, "ra": -135, "comment": "Chudan tsuki"},
-        { "rx": 2.5, "ry": -1, "la": 0, "ra": 0, "comment": ""},
+        { "rx": 2.5, "ry": -1, "la": 0, "ra": 0},
         { "lx": 1.5, "ly": 1, "la": 90, "ra": 45, "comment": "Jodan uke"},
         { "lx": 1, "ly": 0, "la": 135, "ra": 90, "comment": "Chudan tsuki"},
-        { "lx": -2.5, "ly": -1, "la": 0, "ra": 0, "comment": ""},
+        { "lx": -2.5, "ly": -1, "la": 0, "ra": 0},
 
         { "lx": 1, "ly": 0.5, "la": 45, "ra": 0, "comment": "Chudan uchi uke"},
         { "rx": 0, "ry": 1, "la": 0, "ra": -45, "comment": "Chudan uchi uke"},
 
         { "lx": 0, "ly": 2.5, "la": 0, "ra": 0, "comment": "Kick sequence"},
 
-        { "rx": -1, "ry": 1, "la": 90, "ra": 90, "comment": ""},
+        { "rx": -1, "ry": 1, "la": 90, "ra": 90},
         { "lx": 1, "ly": -1.5, "la": -135, "ra": 180, "comment": "Chudan uchi uke"},
         { "rx": 0, "ry": -2.5, "la": 180, "ra": 180, "comment": "Kick sequence"},
 
-        { "lx": -1, "ly": -1, "la": 90, "ra": 90, "comment": ""},
+        { "lx": -1, "ly": -1, "la": 90, "ra": 90},
 
-        { "lx": -1, "ly": -3, "la": 0, "ra": 0, "comment": ""},
+        { "lx": -1, "ly": -3, "la": 0, "ra": 0},
         { "lx": 0.5, "ly": 2, "la": 0, "ra": 0, "comment": "???"},
-        { "rx": 0.5, "ry": -2, "la": 0, "ra": 0, "comment": ""},
+        { "rx": 0.5, "ry": -2, "la": 0, "ra": 0},
 
         { "rx": -1, "ry": 2, "la": 0, "ra": 0, "comment": "Naore - musubi dachi"},
         
@@ -252,9 +266,8 @@
             rc.circle(lCenterX, lCenterY, circleSize, {fill: 'rgba(239, 118, 122, 1.0)', fillStyle: 'solid',});
             rc.circle(rCenterX, rCenterY, circleSize, {fill: 'rgba(69, 105, 144, 1.0)', fillStyle: 'solid',});
         } else {
-            rc.circle((lCenterX + rCenterX) / 2, (lCenterY + rCenterY) / 2, circleSize, {fill: 'rgba(0, 0, 0, 0.3)', fillStyle: 'solid', stroke: 'rgba(0, 0, 0, 0.2)'});
-            rc.circle(lCenterX, lCenterY, circleSize, {fill: 'rgba(239, 118, 122, 0.3)', fillStyle: 'solid', stroke: 'rgba(0, 0, 0, 0.2)'});
-            rc.circle(rCenterX, rCenterY, circleSize, {fill: 'rgba(69, 105, 144, 0.3)', fillStyle: 'solid', stroke: 'rgba(0, 0, 0, 0.2)'});
+            rc.circle(lCenterX, lCenterY, circleSize, {fill: 'rgba(239, 118, 122, 0.2)', fillStyle: 'solid', stroke: 'rgba(0, 0, 0, 0.2)'});
+            rc.circle(rCenterX, rCenterY, circleSize, {fill: 'rgba(69, 105, 144, 0.2)', fillStyle: 'solid', stroke: 'rgba(0, 0, 0, 0.2)'});
         }
 
         const dirLen = cellSize / 2;
@@ -279,8 +292,8 @@
             rc.line(lCenterX, lCenterY, lCenterX + lDir[0] * dirLen, lCenterY + lDir[1] * dirLen, {strokeWidth: 3})
             rc.line(rCenterX, rCenterY, rCenterX + rDir[0] * dirLen, rCenterY + rDir[1] * dirLen, {strokeWidth: 3})
         } else {
-            // rc.line(lCenterX, lCenterY, lCenterX + lDir[0] * dirLen, lCenterY + lDir[1] * dirLen, {strokeWidth: 3, stroke: 'rgba(0, 0, 0, 0.2)'})
-            // rc.line(rCenterX, rCenterY, rCenterX + rDir[0] * dirLen, rCenterY + rDir[1] * dirLen, {strokeWidth: 3, stroke: 'rgba(0, 0, 0, 0.2)'})
+            rc.line(lCenterX, lCenterY, lCenterX + lDir[0] * dirLen, lCenterY + lDir[1] * dirLen, {strokeWidth: 3, stroke: 'rgba(0, 0, 0, 0.2)'})
+            rc.line(rCenterX, rCenterY, rCenterX + rDir[0] * dirLen, rCenterY + rDir[1] * dirLen, {strokeWidth: 3, stroke: 'rgba(0, 0, 0, 0.2)'})
         }
 
         if (isCurrentStep) {
@@ -344,10 +357,12 @@
             }
         }
 
-        // // draw previous steps
-        // for (let i = 0; i < currentStep; i++) {
-        //     drawStep(absoluteSteps[i], false)
-        // }
+        // draw previous steps
+        if (showPrevSteps) {
+            for (let i = 0; i < currentStep; i++) {
+                drawStep(absoluteSteps[i], false)
+            }
+        }
 
         // draw current step
         let step = absoluteSteps[currentStep];
