@@ -49,8 +49,14 @@
                 <option value="gekisai1">Geki Sai Dai Ichi (1)</option>
                 </select>
             </fieldset>
-        </div>
+            </div>
 
+            <div style="padding-bottom: 20px;">
+                <label>
+                    <input id="movement-checkbox" type="checkbox" checked> Show kata path?
+                </label>
+            </div>
+            
             <div>
             <button class="button-primary step-button" onclick="stepBeginning()"><i class="fa-solid fa-backward-fast"></i></button>
             <button class="button-primary step-button" onclick="stepBack()"><i class="fa-solid fa-backward-step"></i></i></button>
@@ -82,6 +88,23 @@
 
 
   <script>
+    let showMovementPath = true;
+
+    document.addEventListener('DOMContentLoaded', function(event) {
+        const checkbox = document.getElementById('movement-checkbox')
+
+        checkbox.addEventListener('change', (event) => {
+            if (event.currentTarget.checked) {
+                showMovementPath = true;
+            } else {
+                showMovementPath = false;
+            }
+
+            draw();
+        })
+
+    });
+
     const N = [0, -1];
     const NE = [.707, -.707];
     const E = [1, 0];
@@ -187,55 +210,10 @@
     // let currentKataSteps = GEKISAI_1_STEPS;
     let currentStep = 0;
 
-    function draw() {
-        let absoluteSteps = [];
-        let tmpLX = 0
-        let tmpLY = 0;
-        let tmpRX = 0
-        let tmpRY = 0;
+    const cellSize = 50;
+    const circleSize = 22;
 
-        for (let i = 0; i < currentKataSteps.length; i++) {
-            let stepLX = currentKataSteps[i]["lx"] ?? 0;
-            let stepLY = currentKataSteps[i]["ly"] ?? 0;
-            let stepRX = currentKataSteps[i]["rx"] ?? 0;
-            let stepRY = currentKataSteps[i]["ry"] ?? 0;
-            tmpLX += stepLX;
-            tmpLY += stepLY;
-            tmpRX += stepRX;
-            tmpRY += stepRY;
-            absoluteSteps.push({
-                "lx": tmpLX, "ly": tmpLY, "rx": tmpRX, "ry": tmpRY,
-                "la": currentKataSteps[i].la ?? 0, "ra": currentKataSteps[i].ra ?? 0,
-                "comment": currentKataSteps[i].comment,
-            })
-        }
-
-
-
-        
-        ctx.clearRect(0, 0, gridWidth, gridHeight)
-
-        // draw grid
-        const cellSize = 50;
-        const circleSize = 20;
-
-        for (let i = 0; i < 20; i++) {
-            let yOffset = cellSize/2
-            rc.line(i * cellSize + yOffset, 0, i * cellSize + yOffset, gridWidth, {stroke: 'rgba(254, 125, 125, 0.8)', bowing: 0});
-            rc.line(0, i * cellSize + yOffset, gridWidth, i * cellSize + yOffset, {stroke: 'rgba(254, 125, 125, 0.8)', bowing: 0});
-        }
-
-        for (let i = 0; i < 20; i++) {
-            rc.line(i * cellSize, 0, i * cellSize, gridWidth, {stroke: 'rgba(60, 60, 60, 0.7)', bowing: 0});
-            rc.line(0, i * cellSize, gridWidth, i * cellSize, {stroke: 'rgba(60, 60, 60, 0.7)', bowing: 0});
-        }
-        rc.line(gridWidth/2, 0, gridWidth/2, gridWidth, {stroke: 'rgba(60, 60, 60, 0.7)', strokeWidth: 3, bowing: 0 });
-        rc.line(0, gridWidth/2, gridWidth, gridWidth/2, {stroke: 'rgba(60, 60, 60, 0.7)', strokeWidth: 3, bowing: 0 });
-
-        let step = absoluteSteps[currentStep];
-
-        console.log("step: ", step)
-
+    function drawStep(step, isCurrentStep) {
         let lCenterX = step.lx * cellSize + gridWidth/2
         let lCenterY = step.ly * -cellSize + gridWidth/2
         let rCenterX = step.rx * cellSize + gridWidth/2
@@ -246,8 +224,14 @@
             rCenterX += circleSize / 2;
         }
 
-        rc.circle(lCenterX, lCenterY, circleSize, {fill: 'rgba(239, 118, 122, 1.0)', fillStyle: 'solid',});
-        rc.circle(rCenterX, rCenterY, circleSize, {fill: 'rgba(69, 105, 144, 1.0)', fillStyle: 'solid',});
+        if (isCurrentStep) {
+            rc.circle(lCenterX, lCenterY, circleSize, {fill: 'rgba(239, 118, 122, 1.0)', fillStyle: 'solid',});
+            rc.circle(rCenterX, rCenterY, circleSize, {fill: 'rgba(69, 105, 144, 1.0)', fillStyle: 'solid',});
+        } else {
+            rc.circle((lCenterX + rCenterX) / 2, (lCenterY + rCenterY) / 2, circleSize, {fill: 'rgba(0, 0, 0, 0.3)', fillStyle: 'solid', stroke: 'rgba(0, 0, 0, 0.2)'});
+            rc.circle(lCenterX, lCenterY, circleSize, {fill: 'rgba(239, 118, 122, 0.3)', fillStyle: 'solid', stroke: 'rgba(0, 0, 0, 0.2)'});
+            rc.circle(rCenterX, rCenterY, circleSize, {fill: 'rgba(69, 105, 144, 0.3)', fillStyle: 'solid', stroke: 'rgba(0, 0, 0, 0.2)'});
+        }
 
         const dirLen = cellSize / 2;
         let lDir = N;
@@ -267,12 +251,84 @@
         else if (step.ra === -90) { rDir = W; }
         else if (step.ra === -45) { rDir = NW; }
 
-        rc.line(lCenterX, lCenterY, lCenterX + lDir[0] * dirLen, lCenterY + lDir[1] * dirLen, {strokeWidth: 3})
-        rc.line(rCenterX, rCenterY, rCenterX + rDir[0] * dirLen, rCenterY + rDir[1] * dirLen, {strokeWidth: 3})
+        if (isCurrentStep) {
+            rc.line(lCenterX, lCenterY, lCenterX + lDir[0] * dirLen, lCenterY + lDir[1] * dirLen, {strokeWidth: 3})
+            rc.line(rCenterX, rCenterY, rCenterX + rDir[0] * dirLen, rCenterY + rDir[1] * dirLen, {strokeWidth: 3})
+        } else {
+            // rc.line(lCenterX, lCenterY, lCenterX + lDir[0] * dirLen, lCenterY + lDir[1] * dirLen, {strokeWidth: 3, stroke: 'rgba(0, 0, 0, 0.2)'})
+            // rc.line(rCenterX, rCenterY, rCenterX + rDir[0] * dirLen, rCenterY + rDir[1] * dirLen, {strokeWidth: 3, stroke: 'rgba(0, 0, 0, 0.2)'})
+        }
+
+        if (isCurrentStep) {
+            let commentContents = step.comment ?? "-";
+            document.getElementById("comment-contents").innerHTML = commentContents;
+        }
+    }
+
+    function draw() {
+        let absoluteSteps = [];
+        let tmpLX = 0
+        let tmpLY = 0;
+        let tmpRX = 0
+        let tmpRY = 0;
+
+        for (let i = 0; i < currentKataSteps.length; i++) {
+            let stepLX = currentKataSteps[i]["lx"] ?? 0;
+            let stepLY = currentKataSteps[i]["ly"] ?? 0;
+            let stepRX = currentKataSteps[i]["rx"] ?? 0;
+            let stepRY = currentKataSteps[i]["ry"] ?? 0;
+            tmpLX += stepLX;
+            tmpLY += stepLY;
+            tmpRX += stepRX;
+            tmpRY += stepRY;
+            absoluteSteps.push({
+                "lx": tmpLX, "ly": tmpLY, "rx": tmpRX, "ry": tmpRY,
+                "centerX": (tmpLX + tmpRX) / 2, "centerY": (tmpLY + tmpRY) / 2,
+                "la": currentKataSteps[i].la ?? 0, "ra": currentKataSteps[i].ra ?? 0,
+                "comment": currentKataSteps[i].comment,
+            })
+        }
 
 
-        let commentContents = step.comment ?? "-";
-        document.getElementById("comment-contents").innerHTML = commentContents;
+
+        
+        ctx.clearRect(0, 0, gridWidth, gridHeight)
+
+        // draw grid
+        for (let i = 0; i < 20; i++) {
+            let yOffset = cellSize/2
+            rc.line(i * cellSize + yOffset, 0, i * cellSize + yOffset, gridWidth, {stroke: 'rgba(254, 125, 125, 0.8)', bowing: 0});
+            rc.line(0, i * cellSize + yOffset, gridWidth, i * cellSize + yOffset, {stroke: 'rgba(254, 125, 125, 0.8)', bowing: 0});
+        }
+
+        for (let i = 0; i < 20; i++) {
+            rc.line(i * cellSize, 0, i * cellSize, gridWidth, {stroke: 'rgba(60, 60, 60, 0.7)', bowing: 0});
+            rc.line(0, i * cellSize, gridWidth, i * cellSize, {stroke: 'rgba(60, 60, 60, 0.7)', bowing: 0});
+        }
+        rc.line(gridWidth/2, 0, gridWidth/2, gridWidth, {stroke: 'rgba(60, 60, 60, 0.7)', strokeWidth: 3, bowing: 0 });
+        rc.line(0, gridWidth/2, gridWidth, gridWidth/2, {stroke: 'rgba(60, 60, 60, 0.7)', strokeWidth: 3, bowing: 0 });
+
+        // draw line between center positions of all previous steps
+        if (showMovementPath) {
+            for (let i = 0; i < currentStep; i++) {
+                let a = absoluteSteps[i];
+                let b = absoluteSteps[i + 1];
+
+                rc.line(a.centerX * cellSize + gridWidth/2, a.centerY * -cellSize + gridWidth/2,
+                        b.centerX * cellSize + gridWidth/2, b.centerY * -cellSize + gridWidth/2,
+                        {stroke: 'rgba(60, 60, 60, 0.7)', strokeWidth: 5, bowing: 0 });
+            }
+        }
+
+        // // draw previous steps
+        // for (let i = 0; i < currentStep; i++) {
+        //     drawStep(absoluteSteps[i], false)
+        // }
+
+        // draw current step
+        let step = absoluteSteps[currentStep];
+        console.log("step: ", step)
+        drawStep(step, true);
     }
 
     function kataChanged() {
