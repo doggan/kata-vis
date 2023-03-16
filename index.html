@@ -26,6 +26,41 @@
             padding-bottom: 30px;
             text-align: center;
         }
+
+
+        .slidecontainer {
+        width: 100%;
+        }
+
+        .slider {
+        -webkit-appearance: none;
+        width: 100%;
+        height: 15px;
+        border-radius: 5px;  
+        background: #d3d3d3;
+        outline: none;
+        opacity: 0.7;
+        -webkit-transition: .2s;
+        transition: opacity .2s;
+        }
+
+        .slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 25px;
+        height: 25px;
+        border-radius: 50%; 
+        background: #33C3F0;
+        cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        background: #33C3F0;
+        cursor: pointer;
+        }
     </style>
 </head>
 
@@ -58,6 +93,12 @@
                 <label>
                     <input id="prev-steps-checkbox" type="checkbox"> Show previous steps?
                 </label>
+            </div>
+
+            <div>
+                <div>
+                    <input type="range" id="playback-bar" class="slider" min="0" max="100" oninput="playbackBarChanged(this.value)">
+                  </div>
             </div>
             
             <div>
@@ -371,8 +412,7 @@
     }
 
     function kataChanged() {
-        const selectedVal = document.getElementById("kata").value;        
-        console.log("## kata changed: ", selectedVal)
+        const selectedVal = document.getElementById("kata").value;
 
         switch (selectedVal) {
             case 'sanchin': currentKataSteps = SANCHIN_STEPS; break;
@@ -381,6 +421,22 @@
         }
 
         currentStep = 0;
+        stepUpdated();
+        draw();
+    }
+
+    function stepUpdated() {
+        const playbackBar = document.getElementById('playback-bar');
+        if (playbackBar) {
+            const barStep = currentStep / (currentKataSteps.length - 1) * 100;
+            playbackBar.value = barStep
+        }
+    }
+
+    function playbackBarChanged(val) {
+        const step = Math.round((val / 100) * (currentKataSteps.length - 1))
+        currentStep = step;
+        stepUpdated();
         draw();
     }
 
@@ -392,6 +448,7 @@
             currentStep = currentKataSteps.length - 1
         }
 
+        stepUpdated();
         draw();
     }
 
@@ -402,19 +459,25 @@
             currentStep = 0;
         }
         
+        stepUpdated();
         draw();
     }
 
     function stepBeginning() {
         currentStep = 0;
+
+        stepUpdated();
         draw();
     }
 
     function stepEnd() {
         currentStep = currentKataSteps.length - 1;
+        stepUpdated();
+
         draw();
     }
 
+    stepUpdated();
     draw();
   </script>
 </body>
