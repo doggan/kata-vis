@@ -79,7 +79,7 @@
                 <b>Kata Selection</b><br>
                 <select id="kata" onchange="kataChanged()">
                 <option value="taikyoku1">Taikyoku Sono Ichi / Ni (1 / 2)</option>
-                <!-- <option value="taikyoku3">Taikyoku Sono San (3)</option> -->
+                <option value="taikyoku3">Taikyoku Sono San (3)</option>
                 <option value="sanchin">Sanchin</option>
                 <option value="gekisai1">Geki Sai Dai Ichi (1)</option>
                 </select>
@@ -224,6 +224,34 @@
         { "rx": -4, "la": -90, "ra": -90, "comment": "Count 18"},
         { "rx": 4, "ry": -2, "la": 90, "ra": 90, "comment": "Count 19"},
         { "lx": 4, "la": 90, "ra": 90, "comment": "Count 20 (kiai❗)"},
+
+        { "lx": -3, "ly": -1, "la": 0, "ra": 0, "comment": "Naore"},
+        { "rx": -1, "la": 0, "ra": 0, "comment": "Bow"},
+    ]
+
+    const TAIKYOKU_3_STEPS = [
+        { "lx": 0, "ly": 0, "la": -45, "ra": 45, "comment": "Musubi dachi" },
+        { "lx": -.5, "rx": .5, "la": 0, "ra": 0, "comment": "Yoi"},
+        { "lx": 0, "ly": -.5, "la": -90, "ra": -45, "comment": "Count 1" },
+        { "rx": -3, "ry": .5, "la": -90, "ra": -90, "comment": "Count 2" },
+        { "rx": 3, "ry": -1.5, "la": 45, "ra": 90, "comment": "Count 3"},
+        { "lx": 3, "ly": .5, "ry": 0, "la": 90, "ra": 90, "comment": "Count 4"},
+        { "lx": -3, "ly": 1, "la": 0, "ra": 0, "comment": "Count 5"},
+        { "rx": 0, "ry": 4, "la": 0, "ra": 0, "comment": "Count 6"},
+        { "rx": 0, "ly": 4, "la": 0, "ra": 0, "comment": "Count 7"},
+        { "rx": 0, "ry": 4, "la": 0, "ra": 0, "comment": "Count 8 (kiai❗)"},
+        { "lx": 2, "ly": 2.5, "la": 90, "ra": 135, "comment": "Count 9"},
+        { "rx": 3, "ry": -0.5, "la": 90, "ra": 90, "comment": "Count 10"},
+        { "rx": -3, "ry": 1.5, "la": -135, "ra": -90, "comment": "Count 11"},
+        { "lx": -3, "ly": -0.5, "la": -90, "ra": -90, "comment": "Count 12"},
+        { "lx": 3, "ly": -1, "la": 180, "ra": 180, "comment": "Count 13"},
+        { "ry": -4, "la": 180, "ra": 180, "comment": "Count 14"},
+        { "ly": -4, "la": 180, "ra": 180, "comment": "Count 15"},
+        { "ry": -4, "la": 180, "ra": 180, "comment": "Count 16 (kiai❗)"},
+        { "lx": -2, "ly": -2.5, "la": -90, "ra": -45, "comment": "Count 17"},
+        { "rx": -3, "ry": 0.5, "la": -90, "ra": -90, "comment": "Count 18"},
+        { "rx": 3, "ry": -1.5, "la": 45, "ra": 90, "comment": "Count 19"},
+        { "lx": 3, "ly": 0.5, "la": 90, "ra": 90, "comment": "Count 20 (kiai❗)"},
 
         { "lx": -3, "ly": -1, "la": 0, "ra": 0, "comment": "Naore"},
         { "rx": -1, "la": 0, "ra": 0, "comment": "Bow"},
@@ -415,6 +443,7 @@
         const selectedVal = document.getElementById("kata").value;
 
         switch (selectedVal) {
+            case 'taikyoku3': currentKataSteps = TAIKYOKU_3_STEPS; break;
             case 'sanchin': currentKataSteps = SANCHIN_STEPS; break;
             case 'gekisai1': currentKataSteps = GEKISAI_1_STEPS; break;
             default: currentKataSteps = TAIKYOKU_1_STEPS; break;
